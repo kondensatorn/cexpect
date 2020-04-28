@@ -80,7 +80,7 @@ the `.gem` file to [rubygems.org](https://rubygems.org).
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at
-https://github.com/[USERNAME]/cexpect.
+https://github.com/kondensatorn/cexpect.
 
 
 ## License
