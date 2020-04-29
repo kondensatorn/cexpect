@@ -1,0 +1,43 @@
+require: rubocop-rspec
+
+AllCops:
+  Exclude:
+    - 'bin/{console,setup}' # not mine
+    - 'Gemfile'             # maintained through "bundle" command
+
+# TODO: Clean up tests
+RSpec/ExpectInHook:
+  Enabled: false
+RSpec/FilePath:
+  Exclude:
+    - spec/cexpect_spec.rb
+RSpec/MessageSpies:
+  Enabled: false
+RSpec/NestedGroups:
+  Enabled: false
+RSpec/VerifiedDoubles:
+  Enabled: false
+
+# Personal preferences
+Layout/DotPosition:
+  EnforcedStyle: trailing
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%i': '()'
+
+# New stuff in rubocop, not yet enabled/disabled by default
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+Lint/RaiseException:
+  Enabled: true
+Lint/StructNewOverride:
+  Enabled: true
+Style/HashEachMethods:
+  Enabled: true
+Style/HashTransformKeys:
+  Enabled: true
+Style/HashTransformValues:
+  Enabled: true
+
+Style/ExponentialNotation:
+  Enabled: false
