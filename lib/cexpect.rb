@@ -1,7 +1,12 @@
+# frozen_string_literal: true
+
 require 'delegate'
 require 'observer'
 require 'pty'
 
+#
+# A module for supplying a different expect method
+#
 module CExpect
   def self.spawn(*args)
     original_rd, wr, pid = PTY.spawn(*args)
@@ -13,6 +18,10 @@ module CExpect
     end
   end
 
+  #
+  # A class delegating normal operations to a wrapped IO, adding an
+  # expect method
+  #
   class Reader < SimpleDelegator
     include Observable
 
@@ -21,11 +30,11 @@ module CExpect
       super
     end
 
-    def expect(pat, timeout = nil, match_method: :_expect_re_match)
+    def expect(pat, timeout = nil, match_method: :re_match)
       buf = +''
 
       result = catch(:result) do
-        loop { _expect_try(pat, buf, timeout, match_method) }
+        loop { expect_try(pat, buf, timeout, match_method) }
       end
 
       if block_given?
@@ -36,13 +45,13 @@ module CExpect
     end
 
     def fexpect(pat, timeout = nil)
-      expect(pat, timeout, match_method: :_expect_string_match)
+      expect(pat, timeout, match_method: :string_match)
     end
 
     private
 
-    def _expect_try(pat, buf, timeout, match_method)
-      c = _expect_getc(timeout)
+    def expect_try(pat, buf, timeout, match_method)
+      c = getc(timeout)
 
       if c.nil?
         @leftovers = buf
@@ -51,32 +60,34 @@ module CExpect
 
       buf << c
 
-      _expect_log(pat, buf)
+      log(pat, buf)
 
       result = send(match_method, buf, pat)
       throw(:result, result) if result
     end
 
-    def _expect_getc(timeout)
+    def getc(timeout)
       return @leftovers.slice!(0).chr unless @leftovers.empty?
 
-      return nil if !IO.select([self], nil, nil, timeout) || eof?
+      rd = __getobj__
 
-      getc.chr
+      return nil if !IO.select([rd], nil, nil, timeout) || eof?
+
+      rd.getc.chr
     end
 
-    def _expect_log(pat, buf)
+    def log(pat, buf)
       return if count_observers.zero?
 
       changed
-      notify_observers("pat: #{pat.inspect}\nbuf: #{buf.inspect}\n")
+      notify_observers(pat, buf)
     end
 
-    def _expect_re_match(buf, pat)
+    def re_match(buf, pat)
       buf.match(pat)
     end
 
-    def _expect_string_match(buf, pat)
+    def string_match(buf, pat)
       buf[0, buf.size - pat.size] if buf.end_with?(pat)
     end
   end

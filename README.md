@@ -62,6 +62,13 @@ end
 
 wr.puts('cat very-large-file')
 contents = rd.fexpect('$ ')
+
+# If CExpect.spawn doesn't suit you
+orig_rd, wr = IO.pipe
+rd = CExpect::Reader.new(orig_rd)
+
+wr.puts "Hello, World!\n"
+greeting = rd.fexpect("\n")
 ```
 
 ## Development
