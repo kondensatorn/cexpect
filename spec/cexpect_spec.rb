@@ -111,55 +111,53 @@ RSpec.describe CExpect do
   end
 
   # rubocop: disable RSpec/MultipleExpectations
-  describe '.spawn' do
+  shared_examples 'wrapper function' do |wrapped_class, method, extra_args|
     context 'without block' do
-      let(:rv) { described_class.spawn('sh') }
+      let(:rv) { described_class.send(method, *extra_args) }
+      let(:wrapped_rv) { wrapped_class.send(method, *extra_args) }
 
-      it 'returns values compatible with PTY.spawn' do
-        psrv = PTY.spawn('sh')
-        expect(rv.size).to eq(psrv.size)
-        # First element delegates to returned IO
-        expect(rv[0].__getobj__).to be_kind_of(psrv[0].class)
-        expect(rv[1]).to be_kind_of(psrv[1].class)
-        expect(rv[2]).to be_kind_of(psrv[2].class)
+      it 'returns values compatible with wrapped method' do
+        expect(rv.size).to eq(wrapped_rv.size)
+        expect(rv.first.__getobj__).to be_kind_of(wrapped_rv.first.class)
+        rv[1..-1].zip(wrapped_rv[1..-1]).each do |a, b|
+          expect(a).to be_kind_of(b.class)
+        end
       end
 
-      it 'returns a reader, implementing #expect' do
-        expect(rv.first).to respond_to(:expect)
-      end
-
-      it 'returns a reader, implementing #fexpect' do
-        expect(rv.first).to respond_to(:fexpect)
+      it 'returns a CExpect::Reader as its first value' do
+        expect(rv.first).to be_kind_of(CExpect::Reader)
       end
     end
 
     context 'with block' do
-      let(:rv) do
-        described_class.spawn('sh') { |r, w, pid| { args: [r, w, pid] } }
+      let(:rv) { described_class.send(method) { |*args| { args: args } } }
+      let(:wrapped_rv) do
+        # Wrapped method may not return the return value of the block
+        wrv = []
+        wrapped_class.send(method) { |*args| wrv.push(*args.flatten) }
+        wrv
       end
 
-      let(:pty_spawn_rv) do
-        psrv = [] # for scope
-        PTY.spawn('sh') { |r, w, pid| psrv.push(r, w, pid) }
-        psrv
+      it 'yields as wrapped method, and returns what the block returns' do
+        expect(rv[:args].size).to eq(wrapped_rv.size)
+        expect(rv[:args].first.__getobj__).to be_kind_of(wrapped_rv.first.class)
+        rv[:args][1..-1].zip(wrapped_rv[1..-1]).each do |r, wr|
+          expect(r).to be_kind_of(wr.class)
+        end
       end
 
-      it 'yields as PTY.spawn, and returns what the block returns' do
-        expect(rv[:args].size).to eq(pty_spawn_rv.size)
-        # First object delegates to returned IO
-        expect(rv[:args][0].__getobj__).to be_kind_of(pty_spawn_rv[0].class)
-        expect(rv[:args][1]).to be_kind_of(pty_spawn_rv[1].class)
-        expect(rv[:args][2]).to be_kind_of(pty_spawn_rv[2].class)
-      end
-
-      it 'yields a reader that responds to #expect' do
-        expect(rv[:args].first).to respond_to(:expect)
-      end
-
-      it 'yields a reader that responds to #fexpect' do
-        expect(rv[:args].first).to respond_to(:fexpect)
+      it 'yields a CExpect::Reader as first parameter' do
+        expect(rv[:args].first).to be_kind_of(CExpect::Reader)
       end
     end
+  end
+
+  describe '.pipe' do
+    it_behaves_like 'wrapper function', IO, :pipe, []
+  end
+
+  describe '.spawn' do
+    it_behaves_like 'wrapper function', PTY, :spawn, ['sh']
   end
   # rubocop: enable RSpec/MultipleExpectations
 end
