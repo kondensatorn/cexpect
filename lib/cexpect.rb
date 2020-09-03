@@ -1,22 +1,14 @@
 # frozen_string_literal: true
 
+require 'cexpect/module_methods'
 require 'delegate'
 require 'observer'
-require 'pty'
 
 #
 # A module for supplying a different expect method
 #
 module CExpect
-  def self.spawn(*args)
-    original_rd, wr, pid = PTY.spawn(*args)
-    rd = CExpect::Reader.new(original_rd)
-    if block_given?
-      yield(rd, wr, pid)
-    else
-      [rd, wr, pid]
-    end
-  end
+  extend CExpect::ModuleMethods
 
   #
   # A class delegating normal operations to a wrapped IO, adding an
