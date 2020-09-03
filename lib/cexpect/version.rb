@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-module Cexpect
-  VERSION = '0.1.3'
+module CExpect
+  VERSION = '0.1.4'
 end
