@@ -4,7 +4,7 @@ require_relative 'lib/cexpect/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'cexpect'
-  spec.version       = Cexpect::VERSION
+  spec.version       = CExpect::VERSION
   spec.authors       = ['Christer Jansson']
   spec.email         = ['christer@janssons.org']
 
