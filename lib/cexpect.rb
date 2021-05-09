@@ -15,11 +15,9 @@ module CExpect
   # expect method
   #
   class Reader < SimpleDelegator
-    include Observable
-
-    def initialize(_original)
-      @leftovers = ''
-      super
+    def initialize(io, observers = nil)
+      extend(LoggingReader) if observers
+      super(io)
     end
 
     def expect(pat, timeout = nil, match_method: :re_match)
@@ -45,34 +43,22 @@ module CExpect
     def expect_try(pat, buf, timeout, match_method)
       c = getc(timeout)
 
-      if c.nil?
-        @leftovers = buf
-        throw(:result, nil)
-      end
+      throw(:result, nil) if c.nil?
 
       buf << c
 
-      log(pat, buf)
+      log(pat, buf) if respond_to?(:log)
 
       result = send(match_method, buf, pat)
       throw(:result, result) if result
     end
 
     def getc(timeout)
-      return @leftovers.slice!(0).chr unless @leftovers.empty?
-
       rd = __getobj__
 
       return nil if !IO.select([rd], nil, nil, timeout) || eof?
 
       rd.getc.chr
-    end
-
-    def log(pat, buf)
-      return if count_observers.zero?
-
-      changed
-      notify_observers(pat, buf)
     end
 
     def re_match(buf, pat)
@@ -81,6 +67,20 @@ module CExpect
 
     def string_match(buf, pat)
       buf[0, buf.size - pat.size] if buf.end_with?(pat)
+    end
+  end
+
+  #
+  # Adds logging capability when observers are given to constructor
+  #
+  module LoggingReader
+    include Observable
+
+    def log(pat, buf)
+      return if count_observers.zero?
+
+      changed
+      notify_observers(pat, buf)
     end
   end
 end
