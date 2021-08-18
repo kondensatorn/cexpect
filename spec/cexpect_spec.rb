@@ -78,7 +78,11 @@ RSpec.describe CExpect do
           let(:pattern) { /> / }
           let(:logger_output) { +'' }
           let(:logger) { double('logger') }
-          let(:io) { described_class::Reader.new(pipe.reader, logger) }
+          let(:io) do
+            described_class::Reader.new(pipe.reader).tap do |obj|
+              obj.add_observer(logger)
+            end
+          end
 
           before do
             allow(logger).
