@@ -11,13 +11,16 @@ module CExpect
   extend CExpect::ModuleMethods
 
   #
-  # A class delegating normal operations to a wrapped IO, adding an
-  # expect method
+  # A class delegating normal operations to a wrapped IO, adding
+  # expect methods
   #
   class Reader < SimpleDelegator
-    def initialize(io, observers = nil)
-      extend(LoggingReader) if observers
-      super(io)
+    def add_observer(*args)
+      extend Observable # overwrites this method with Observable#add_observer
+      # Call the new add_observer method
+      add_observer(*args)
+
+      extend LoggingReader
     end
 
     def expect(pat, timeout = nil, match_method: :re_match)
@@ -71,11 +74,9 @@ module CExpect
   end
 
   #
-  # Adds logging capability when observers are given to constructor
+  # Adds logging capability
   #
   module LoggingReader
-    include Observable
-
     def log(pat, buf)
       return if count_observers.zero?
 
