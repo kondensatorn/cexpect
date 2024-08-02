@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'ostruct'
+PipeContainer = Struct.new(:reader, :writer)
 
 # TODO: Haven't figured out how to fix this
-# rubocop:disable Metrics/BlockLength
+# rubocop:disable Metrics/BlockLength, RSpec/MultipleMemoizedHelpers
 RSpec.describe CExpect do
   describe 'expect-style methods' do
-    let(:pipe) { OpenStruct.new.tap { |os| os.reader, os.writer = IO.pipe } }
+    let(:pipe) { PipeContainer.new(*IO.pipe) }
     let(:io) { described_class::Reader.new(pipe.reader) }
 
     let(:filename) { 'a_nice_file.name' }
@@ -110,7 +110,7 @@ RSpec.describe CExpect do
 
         before { expect(checker).to receive(:check) }
 
-        it { is_expected.to be_kind_of(MatchData) }
+        it { is_expected.to be_a(MatchData) }
       end
     end
   end
@@ -123,14 +123,14 @@ RSpec.describe CExpect do
 
       it 'returns values compatible with wrapped method' do
         expect(rv.size).to eq(wrapped_rv.size)
-        expect(rv.first.__getobj__).to be_kind_of(wrapped_rv.first.class)
-        rv[1..-1].zip(wrapped_rv[1..-1]).each do |a, b|
-          expect(a).to be_kind_of(b.class)
+        expect(rv.first.__getobj__).to be_a(wrapped_rv.first.class)
+        rv[1..].zip(wrapped_rv[1..]).each do |a, b|
+          expect(a).to be_a(b.class)
         end
       end
 
       it 'returns a CExpect::Reader as its first value' do
-        expect(rv.first).to be_kind_of(CExpect::Reader)
+        expect(rv.first).to be_a(CExpect::Reader)
       end
     end
 
@@ -145,14 +145,14 @@ RSpec.describe CExpect do
 
       it 'yields as wrapped method, and returns what the block returns' do
         expect(rv[:args].size).to eq(wrapped_rv.size)
-        expect(rv[:args].first.__getobj__).to be_kind_of(wrapped_rv.first.class)
-        rv[:args][1..-1].zip(wrapped_rv[1..-1]).each do |r, wr|
-          expect(r).to be_kind_of(wr.class)
+        expect(rv[:args].first.__getobj__).to be_a(wrapped_rv.first.class)
+        rv[:args][1..].zip(wrapped_rv[1..]).each do |r, wr|
+          expect(r).to be_a(wr.class)
         end
       end
 
       it 'yields a CExpect::Reader as first parameter' do
-        expect(rv[:args].first).to be_kind_of(CExpect::Reader)
+        expect(rv[:args].first).to be_a(CExpect::Reader)
       end
     end
   end
@@ -167,4 +167,4 @@ RSpec.describe CExpect do
   # rubocop: enable RSpec/MultipleExpectations
 end
 
-# rubocop:enable Metrics/BlockLength
+# rubocop:enable Metrics/BlockLength, RSpec/MultipleMemoizedHelpers

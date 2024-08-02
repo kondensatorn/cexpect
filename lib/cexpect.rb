@@ -59,7 +59,7 @@ module CExpect
     def getc(timeout)
       rd = __getobj__
 
-      return nil if !IO.select([rd], nil, nil, timeout) || eof?
+      return nil if !rd.wait_readable(timeout) || eof?
 
       rd.getc.chr
     end

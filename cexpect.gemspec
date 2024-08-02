@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop: disable Gemspec/RequireMFA
+
 require_relative 'lib/cexpect/version'
 
 Gem::Specification.new do |spec|
@@ -9,11 +11,11 @@ Gem::Specification.new do |spec|
   spec.email         = ['christer@janssons.org']
 
   spec.summary       = 'An improved expect method'
-  spec.description   = 'An expect method with more reasonable return' \
-                       ' values and logging functionality'
+  spec.description   = 'An expect method with more reasonable return ' \
+                       'values and logging functionality'
   spec.homepage      = 'https://github.com/kondensatorn/cexpect'
   spec.license       = 'BSD-2-Clause'
-  spec.required_ruby_version = Gem::Requirement.new('>= 2.3.0')
+  spec.required_ruby_version = Gem::Requirement.new('>= 3.0.0')
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
@@ -30,3 +32,5 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 end
+
+# rubocop: enable Gemspec/RequireMFA

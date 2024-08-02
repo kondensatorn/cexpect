@@ -3,8 +3,8 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in cexpect.gemspec
 gemspec
 
-gem "rake", "~> 12.0"
-gem "rspec", "~> 3.0"
-
-gem "rubocop", "~> 0.82.0"
-gem "rubocop-rspec", "~> 1.38"
+gem "rake", "~> 13.2"
+gem "rspec", "~> 3.13"
+gem "rspec-support", "~> 3.13.1"
+gem "rubocop", "~> 1.65"
+gem "rubocop-rspec", "~> 3.0"
