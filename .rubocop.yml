@@ -4,13 +4,11 @@ AllCops:
   Exclude:
     - 'bin/{console,setup}' # not mine
     - 'Gemfile'             # maintained through "bundle" command
+  NewCops: enable
 
 # TODO: Clean up tests
 RSpec/ExpectInHook:
   Enabled: false
-RSpec/FilePath:
-  Exclude:
-    - spec/cexpect_spec.rb
 RSpec/MessageSpies:
   Enabled: false
 RSpec/NestedGroups:
